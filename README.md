@@ -1,75 +1,61 @@
-# React + TypeScript + Vite
+# Doctor Appointment Booking — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Tailwind frontend for a clinic appointment booking system. Talks to the [backend API](../doctor-appointment-backend) over Sanctum bearer tokens.
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20+
+- The backend running locally (see its README) — this app is useless without it.
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+cp .env.example .env
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+`.env` just needs the backend's API base URL (already correct by default if you're running the backend on its default port):
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```
+VITE_API_URL=http://localhost:8000/api/v1
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Start the dev server:
 
+```bash
+npm run dev
+```
+
+Opens at `http://localhost:5173`.
+
+## Portals — who logs in where
+
+This app has three separate login pages, one per role. There's no single shared login — go straight to the portal you need:
+
+| Portal | Login URL | Who it's for | How to get an account |
+|---|---|---|---|
+| **Patient** | `http://localhost:5173/login` | Patients booking/managing their own appointments | Self-register at `http://localhost:5173/register` |
+| **Admin** | `http://localhost:5173/admin/login` | Clinic staff managing doctors, availability, breaks, and viewing all appointments | Seeded — see backend README for the admin credentials |
+| **Doctor** | `http://localhost:5173/doctor/login` | Doctors viewing their own appointment list (read-only) | Created by an admin when the doctor is added (email+password set at that time) — see backend README for sample seeded doctor logins |
+
+Each portal only exposes what that role can do — e.g. a doctor account can't reach `/admin/*`, and a patient can't see other patients' appointments. Logging in redirects you to that portal's home page automatically; the root `/` redirects to the patient login.
+
+## Build
+
+```bash
+npm run build   # type-checks + production build to dist/
+npm run lint
+```
+
+## Project structure
+
+```
+src/
+  pages/patient/   patient portal pages
+  pages/admin/     admin portal pages
+  pages/doctor/    doctor portal pages
+  components/      shared UI primitives (Button, Badge, PageHeader, NavBar, SlotPicker)
+  context/         auth state (token, current user, role)
+  lib/             axios client + small helpers
+  types/           shared TypeScript types matching the API's response shapes
 ```
