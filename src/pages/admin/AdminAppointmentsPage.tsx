@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Badge } from '../../components/Badge'
 import { NavBar } from '../../components/NavBar'
+import { PageHeader } from '../../components/PageHeader'
 import { api, unwrap } from '../../lib/api'
 import type { Appointment } from '../../types'
 
@@ -15,39 +17,33 @@ export function AdminAppointmentsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--panel)]">
       <NavBar />
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="mb-6 text-2xl font-semibold text-gray-900">All Appointments</h1>
+        <PageHeader title="All appointments" />
         {loading ? (
-          <p className="text-gray-500">Loading…</p>
+          <p className="text-[var(--ink)]/60">Loading…</p>
         ) : appointments.length === 0 ? (
-          <p className="text-gray-500">No appointments yet.</p>
+          <p className="text-[var(--ink)]/60">No appointments yet.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-[var(--line)] rounded-[4px] border border-[var(--line)] bg-white">
             {appointments.map((appt) => (
-              <div
-                key={appt.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div>
-                  <p className="font-medium text-gray-900">{appt.patient?.name}</p>
-                  <p className="text-sm text-gray-500">{appt.patient?.email}</p>
+              <div key={appt.id} className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+                <div className="min-w-[10rem]">
+                  <p className="font-medium text-[var(--ink)]">{appt.patient?.name}</p>
+                  <p className="text-sm text-[var(--ink)]/50">{appt.patient?.email}</p>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">{appt.doctor.name}</p>
-                  <p className="text-sm text-indigo-600">{appt.doctor.specialization}</p>
+                <div className="min-w-[10rem]">
+                  <p className="font-medium text-[var(--ink)]">{appt.doctor.name}</p>
+                  <p className="text-sm text-[var(--accent)]">{appt.doctor.specialization}</p>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {appt.appointment_date} · {appt.start_time}–{appt.end_time}
+                <div className="text-sm text-[var(--ink)]/60">
+                  <div>{appt.appointment_date}</div>
+                  <div>
+                    {appt.start_time}–{appt.end_time}
+                  </div>
                 </div>
-                <span
-                  className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                    appt.status === 'booked' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                  }`}
-                >
-                  {appt.status}
-                </span>
+                <Badge status={appt.status} />
               </div>
             ))}
           </div>

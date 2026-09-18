@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
+import { Badge } from '../../components/Badge'
+import { Button } from '../../components/Button'
 import { NavBar } from '../../components/NavBar'
+import { PageHeader } from '../../components/PageHeader'
 import { api, unwrap } from '../../lib/api'
 import type { Appointment } from '../../types'
 
@@ -34,42 +37,42 @@ export function MyAppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <NavBar />
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <h1 className="mb-6 text-2xl font-semibold text-gray-900">My Appointments</h1>
+      <div className="mx-auto max-w-2xl px-4 py-8">
+        <PageHeader title="My Appointments" />
         {loading ? (
-          <p className="text-gray-500">Loading…</p>
+          <p className="text-sm text-[var(--ink)]/60">Loading…</p>
         ) : appointments.length === 0 ? (
-          <p className="text-gray-500">You have no appointments yet.</p>
+          <p className="text-sm text-[var(--ink)]/60">You have no appointments yet.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="border-t border-[var(--line)]">
             {appointments.map((appt) => (
               <div
                 key={appt.id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                className="flex items-center justify-between gap-4 border-b border-[var(--line)] py-4"
               >
                 <div>
-                  <p className="font-medium text-gray-900">{appt.doctor.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {appt.appointment_date} · {appt.start_time}–{appt.end_time}
+                  <p className="text-lg text-[var(--ink)]" style={{ fontFamily: 'var(--font-display)' }}>
+                    {appt.doctor.name}
                   </p>
-                  <span
-                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                      appt.status === 'booked' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                    }`}
-                  >
-                    {appt.status}
-                  </span>
+                  <p className="mt-1 text-sm text-[var(--ink)]/60">
+                    {appt.appointment_date}
+                    <br />
+                    {appt.start_time}–{appt.end_time}
+                  </p>
+                  <div className="mt-2">
+                    <Badge status={appt.status} />
+                  </div>
                 </div>
                 {appt.status === 'booked' && !isPast(appt) && (
-                  <button
+                  <Button
+                    variant="danger"
                     onClick={() => handleCancel(appt.id)}
                     disabled={cancellingId === appt.id}
-                    className="rounded-md bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
                   >
                     {cancellingId === appt.id ? 'Cancelling…' : 'Cancel'}
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}

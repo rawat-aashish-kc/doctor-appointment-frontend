@@ -1,21 +1,23 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from '../../components/Button'
 import { NavBar } from '../../components/NavBar'
+import { PageHeader } from '../../components/PageHeader'
 import { api, unwrap } from '../../lib/api'
 import { DAY_LABELS, WEEK_ORDER } from '../../lib/days'
 import type { Doctor } from '../../types'
 
-interface DayRow {
+interface PeriodRow {
   start_time: string
   end_time: string
 }
 
-type WeekState = Record<number, DayRow>
+type WeekState = Record<number, PeriodRow[]>
 
 function emptyWeek(): WeekState {
   const week: WeekState = {}
   for (const day of WEEK_ORDER) {
-    week[day] = { start_time: '', end_time: '' }
+    week[day] = []
   }
   return week
 }
@@ -39,35 +41,47 @@ export function AdminAvailabilityPage() {
         setDoctor(loadedDoctor)
         const next = emptyWeek()
         for (const availability of loadedDoctor.availabilities ?? []) {
-          next[availability.day_of_week] = {
-            start_time: availability.start_time.slice(0, 5),
-            end_time: availability.end_time.slice(0, 5),
-          }
+          next[availability.day_of_week] = [
+            ...next[availability.day_of_week],
+            {
+              start_time: availability.start_time.slice(0, 5),
+              end_time: availability.end_time.slice(0, 5),
+            },
+          ]
         }
         setWeek(next)
       })
       .finally(() => setLoading(false))
   }, [id])
 
-  function updateDay(day: number, field: keyof DayRow, value: string) {
-    setWeek((prev) => ({ ...prev, [day]: { ...prev[day], [field]: value } }))
+  function updatePeriod(day: number, index: number, field: keyof PeriodRow, value: string) {
+    setWeek((prev) => {
+      const periods = prev[day].map((period, i) => (i === index ? { ...period, [field]: value } : period))
+      return { ...prev, [day]: periods }
+    })
+  }
+
+  function addPeriod(day: number) {
+    setWeek((prev) => ({ ...prev, [day]: [...prev[day], { start_time: '', end_time: '' }] }))
+  }
+
+  function removePeriod(day: number, index: number) {
+    setWeek((prev) => ({ ...prev, [day]: prev[day].filter((_, i) => i !== index) }))
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
 
-    const availabilities = WEEK_ORDER.filter((day) => week[day].start_time && week[day].end_time).map(
-      (day) => ({
-        day_of_week: day,
-        start_time: week[day].start_time,
-        end_time: week[day].end_time,
-      }),
+    const availabilities = WEEK_ORDER.flatMap((day) =>
+      week[day]
+        .filter((period) => period.start_time && period.end_time)
+        .map((period) => ({ day_of_week: day, start_time: period.start_time, end_time: period.end_time })),
     )
 
     const invalidRow = availabilities.find((row) => row.start_time >= row.end_time)
     if (invalidRow) {
-      setError('End time must be after start time for every day.')
+      setError('End time must be after start time for every period.')
       return
     }
 
@@ -76,61 +90,69 @@ export function AdminAvailabilityPage() {
       await api.put(`/admin/doctors/${id}/availability`, { availabilities })
       navigate('/admin/doctors')
     } catch {
-      setError('Could not save availability. Please check the times and try again.')
+      setError('Could not save availability. Check for overlapping periods and try again.')
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--panel)]">
       <NavBar />
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="mb-1 text-2xl font-semibold text-gray-900">Weekly Availability</h1>
-        {doctor && <p className="mb-6 text-indigo-600">{doctor.name}</p>}
+        <PageHeader title="Weekly availability" />
+        {doctor && <p className="mb-6 text-[var(--ink)]/60">{doctor.name}</p>}
 
         {loading ? (
-          <p className="text-gray-500">Loading…</p>
+          <p className="text-[var(--ink)]/60">Loading…</p>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-          >
-            {error && <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-            {WEEK_ORDER.map((day) => (
-              <div key={day} className="flex items-center gap-3">
-                <span className="w-24 text-sm font-medium text-gray-700">{DAY_LABELS[day]}</span>
-                <input
-                  type="time"
-                  value={week[day].start_time}
-                  onChange={(e) => updateDay(day, 'start_time', e.target.value)}
-                  className="rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
-                />
-                <span className="text-gray-400">to</span>
-                <input
-                  type="time"
-                  value={week[day].end_time}
-                  onChange={(e) => updateDay(day, 'end_time', e.target.value)}
-                  className="rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
-                />
-                {(week[day].start_time || week[day].end_time) && (
-                  <button
-                    type="button"
-                    onClick={() => setWeek((prev) => ({ ...prev, [day]: { start_time: '', end_time: '' } }))}
-                    className="text-xs text-gray-400 hover:text-red-500"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {submitting ? 'Saving…' : 'Save Availability'}
-            </button>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <p className="rounded-[4px] bg-[var(--flag-soft)] px-3 py-2 text-sm text-[var(--flag)]">{error}</p>
+            )}
+            <div className="divide-y divide-[var(--line)] rounded-[4px] border border-[var(--line)] bg-white">
+              {WEEK_ORDER.map((day) => (
+                <div key={day} className="flex flex-wrap items-start gap-3 px-4 py-3">
+                  <span className="w-24 pt-1.5 text-sm font-medium text-[var(--ink)]">{DAY_LABELS[day]}</span>
+                  <div className="flex flex-1 flex-col gap-2">
+                    {week[day].map((period, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <input
+                          type="time"
+                          value={period.start_time}
+                          onChange={(e) => updatePeriod(day, index, 'start_time', e.target.value)}
+                          className="rounded-[4px] border border-[var(--line)] px-2 py-1.5 text-sm text-[var(--ink)] focus:border-[var(--accent)] focus:outline-none"
+                        />
+                        <span className="text-sm text-[var(--ink)]/50">to</span>
+                        <input
+                          type="time"
+                          value={period.end_time}
+                          onChange={(e) => updatePeriod(day, index, 'end_time', e.target.value)}
+                          className="rounded-[4px] border border-[var(--line)] px-2 py-1.5 text-sm text-[var(--ink)] focus:border-[var(--accent)] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePeriod(day, index)}
+                          className="text-sm text-[var(--ink)]/40 hover:text-[var(--flag)]"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => addPeriod(day)}
+                      className="self-start text-sm text-[var(--accent)] hover:underline"
+                    >
+                      Add period
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button type="submit" disabled={submitting} className="w-full">
+              {submitting ? 'Saving…' : 'Save availability'}
+            </Button>
           </form>
         )}
       </div>

@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '../../components/Button'
 import { NavBar } from '../../components/NavBar'
+import { PageHeader } from '../../components/PageHeader'
 import { api, unwrap } from '../../lib/api'
 import { DAY_LABELS, WEEK_ORDER } from '../../lib/days'
 import type { Doctor } from '../../types'
+
+const LINK_BUTTON = 'rounded-[4px] border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--ink)] transition-colors hover:bg-[var(--panel)]'
+const LINK_BUTTON_PRIMARY = 'rounded-[4px] bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#255a4f]'
 
 export function AdminDoctorListPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -33,73 +38,76 @@ export function AdminDoctorListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--panel)]">
       <NavBar />
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">Doctors &amp; Availability</h1>
-          <Link
-            to="/admin/doctors/new"
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            Add Doctor
-          </Link>
-        </div>
+        <PageHeader
+          title="Doctors"
+          action={
+            <Link to="/admin/doctors/new" className={LINK_BUTTON_PRIMARY}>
+              Add doctor
+            </Link>
+          }
+        />
 
         {loading ? (
-          <p className="text-gray-500">Loading…</p>
+          <p className="text-[var(--ink)]/60">Loading…</p>
         ) : doctors.length === 0 ? (
-          <p className="text-gray-500">No doctors yet. Add one to get started.</p>
+          <p className="text-[var(--ink)]/60">No doctors yet. Add one to get started.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="divide-y divide-[var(--line)] rounded-[4px] border border-[var(--line)] bg-white">
             {doctors.map((doctor) => (
-              <div key={doctor.id} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+              <div key={doctor.id} className="px-5 py-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-medium text-gray-900">{doctor.name}</h2>
-                    <p className="text-sm text-indigo-600">{doctor.specialization}</p>
+                    <h2 className="text-lg text-[var(--ink)]" style={{ fontFamily: 'var(--font-display)' }}>
+                      {doctor.name}
+                    </h2>
+                    <p className="text-sm text-[var(--accent)]">{doctor.specialization}</p>
                     {(doctor.email || doctor.phone) && (
-                      <p className="text-sm text-gray-500">
-                        {[doctor.email, doctor.phone].filter(Boolean).join(' · ')}
+                      <p className="text-sm text-[var(--ink)]/50">
+                        {[doctor.email, doctor.phone].filter(Boolean).join('  ')}
                       </p>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <Link
-                      to={`/admin/doctors/${doctor.id}/availability`}
-                      className="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
-                    >
+                    <Link to={`/admin/doctors/${doctor.id}/availability`} className={LINK_BUTTON}>
                       Manage availability
                     </Link>
-                    <Link
-                      to={`/admin/doctors/${doctor.id}/edit`}
-                      className="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
-                    >
+                    <Link to={`/admin/doctors/${doctor.id}/breaks`} className={LINK_BUTTON}>
+                      Manage breaks
+                    </Link>
+                    <Link to={`/admin/doctors/${doctor.id}/edit`} className={LINK_BUTTON}>
                       Edit
                     </Link>
-                    <button
-                      onClick={() => handleDelete(doctor.id)}
+                    <Button
+                      type="button"
+                      variant="danger"
                       disabled={deletingId === doctor.id}
-                      className="rounded-md bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+                      onClick={() => handleDelete(doctor.id)}
                     >
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-7 gap-2 text-center text-xs">
+                <div className="mt-3 grid grid-cols-7 gap-2 text-center text-xs">
                   {WEEK_ORDER.map((day) => {
-                    const availability = doctor.availabilities?.find((a) => a.day_of_week === day)
+                    const periods = doctor.availabilities?.filter((a) => a.day_of_week === day) ?? []
                     return (
                       <div
                         key={day}
-                        className={`rounded-md px-1 py-2 ${
-                          availability ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-50 text-gray-400'
+                        className={`rounded-[4px] px-1 py-2 ${
+                          periods.length > 0
+                            ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
+                            : 'bg-[var(--panel)] text-[var(--ink)]/40'
                         }`}
                       >
                         <div className="font-medium">{DAY_LABELS[day].slice(0, 3)}</div>
-                        <div className="mt-0.5">
-                          {availability ? `${availability.start_time}–${availability.end_time}` : '—'}
+                        <div className="mt-0.5 leading-tight">
+                          {periods.length > 0
+                            ? periods.map((p) => `${p.start_time}–${p.end_time}`).join(', ')
+                            : '—'}
                         </div>
                       </div>
                     )

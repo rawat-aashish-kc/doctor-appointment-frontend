@@ -14,11 +14,19 @@ export interface Doctor {
   email: string | null
   phone: string | null
   availabilities?: DoctorAvailability[]
+  breaks?: DoctorBreak[]
 }
 
 export interface DoctorAvailability {
   id: number
   day_of_week: number
+  start_time: string
+  end_time: string
+}
+
+export interface DoctorBreak {
+  id: number
+  break_date: string
   start_time: string
   end_time: string
 }

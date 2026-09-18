@@ -8,7 +8,7 @@ interface SlotPickerProps {
 
 export function SlotPicker({ slots, selected, onSelect }: SlotPickerProps) {
   if (slots.length === 0) {
-    return <p className="text-sm text-gray-500">No available slots for this date.</p>
+    return <p className="text-sm text-[var(--ink)]/60">No available slots for this date.</p>
   }
 
   return (
@@ -17,10 +17,10 @@ export function SlotPicker({ slots, selected, onSelect }: SlotPickerProps) {
         <button
           key={slot.start_time}
           onClick={() => onSelect(slot.start_time)}
-          className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
+          className={`rounded-[4px] border px-3 py-2 text-sm font-medium transition-colors ${
             selected === slot.start_time
-              ? 'border-indigo-600 bg-indigo-600 text-white'
-              : 'border-gray-300 bg-white text-gray-700 hover:border-indigo-400 hover:text-indigo-600'
+              ? 'border-[var(--accent)] bg-[var(--accent)] text-white'
+              : 'border-[var(--line)] bg-transparent text-[var(--ink)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]'
           }`}
         >
           {slot.start_time}

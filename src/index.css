@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+:root {
+  --paper: #f6f8f6;
+  --ink: #14231d;
+  --accent: #2f6f62;
+  --accent-soft: #e4ede9;
+  --flag: #b5533c;
+  --flag-soft: #f3e5e0;
+  --line: #dce3de;
+  --panel: #eef2ef;
+  --font-display: 'Fraunces', serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+}

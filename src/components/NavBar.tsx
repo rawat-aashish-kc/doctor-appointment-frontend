@@ -25,41 +25,41 @@ export function NavBar() {
   }
 
   return (
-    <nav className="border-b border-gray-200 bg-white">
+    <nav className="border-b border-[var(--line)] bg-[var(--paper)]">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-6">
-          <span className="font-semibold text-gray-900">{PORTAL_LABEL[user.role]}</span>
+          <span className="font-medium text-[var(--ink)]">{PORTAL_LABEL[user.role]}</span>
           {user.role === 'admin' && (
             <>
-              <Link to="/admin/doctors" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/admin/doctors" className="text-sm text-[var(--ink)]/70 hover:text-[var(--accent)]">
                 Doctors
               </Link>
-              <Link to="/admin/appointments" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/admin/appointments" className="text-sm text-[var(--ink)]/70 hover:text-[var(--accent)]">
                 Appointments
               </Link>
             </>
           )}
           {user.role === 'doctor' && (
-            <Link to="/doctor/appointments" className="text-sm text-gray-600 hover:text-gray-900">
+            <Link to="/doctor/appointments" className="text-sm text-[var(--ink)]/70 hover:text-[var(--accent)]">
               My Appointments
             </Link>
           )}
           {user.role === 'patient' && (
             <>
-              <Link to="/doctors" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/doctors" className="text-sm text-[var(--ink)]/70 hover:text-[var(--accent)]">
                 Doctors
               </Link>
-              <Link to="/appointments" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/appointments" className="text-sm text-[var(--ink)]/70 hover:text-[var(--accent)]">
                 My Appointments
               </Link>
             </>
           )}
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">{user.name}</span>
+          <span className="text-sm text-[var(--ink)]/60">{user.name}</span>
           <button
             onClick={handleLogout}
-            className="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+            className="rounded-[4px] border border-[var(--line)] px-3 py-1.5 text-sm font-medium text-[var(--ink)] hover:bg-[var(--panel)]"
           >
             Log out
           </button>

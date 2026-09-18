@@ -10,6 +10,7 @@ import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDoctorListPage } from './pages/admin/AdminDoctorListPage'
 import { AdminDoctorFormPage } from './pages/admin/AdminDoctorFormPage'
 import { AdminAvailabilityPage } from './pages/admin/AdminAvailabilityPage'
+import { AdminBreaksPage } from './pages/admin/AdminBreaksPage'
 import { AdminAppointmentsPage } from './pages/admin/AdminAppointmentsPage'
 import { DoctorLoginPage } from './pages/doctor/DoctorLoginPage'
 import { DoctorAppointmentsPage } from './pages/doctor/DoctorAppointmentsPage'
@@ -77,6 +78,14 @@ function App() {
           element={
             <ProtectedRoute role="admin">
               <AdminAvailabilityPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/doctors/:id/breaks"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminBreaksPage />
             </ProtectedRoute>
           }
         />

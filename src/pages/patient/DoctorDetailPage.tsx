@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from '../../components/Button'
 import { NavBar } from '../../components/NavBar'
 import { SlotPicker } from '../../components/SlotPicker'
 import { api, unwrap } from '../../lib/api'
@@ -68,44 +69,42 @@ export function DoctorDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <NavBar />
-      <div className="mx-auto max-w-2xl px-4 py-8">
+      <div className="mx-auto max-w-xl px-4 py-8">
         {doctor ? (
-          <>
-            <h1 className="text-2xl font-semibold text-gray-900">{doctor.name}</h1>
-            <p className="mb-6 text-indigo-600">{doctor.specialization}</p>
-          </>
+          <div className="mb-6">
+            <h1 className="text-2xl text-[var(--ink)]">{doctor.name}</h1>
+            <p className="mt-1 text-sm text-[var(--accent)]">{doctor.specialization}</p>
+          </div>
         ) : (
-          <p className="mb-6 text-gray-500">Loading doctor…</p>
+          <p className="mb-6 text-sm text-[var(--ink)]/60">Loading doctor…</p>
         )}
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Date</label>
+        <div className="border-t border-[var(--line)] pt-6">
+          <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Date</label>
           <input
             type="date"
             min={today()}
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="mb-4 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            className="mb-6 rounded-[4px] border border-[var(--line)] bg-transparent px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--accent)] focus:outline-none"
           />
 
-          <h2 className="mb-2 text-sm font-medium text-gray-700">Available slots</h2>
+          <h2 className="mb-3 text-sm font-medium text-[var(--ink)]">Available slots</h2>
           {loadingSlots ? (
-            <p className="text-sm text-gray-500">Loading slots…</p>
+            <p className="text-sm text-[var(--ink)]/60">Loading slots…</p>
           ) : (
             <SlotPicker slots={slots} selected={selected} onSelect={setSelected} />
           )}
 
-          {error && <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {error && (
+            <p className="mt-4 rounded-[4px] bg-[var(--flag-soft)] px-3 py-2 text-sm text-[var(--flag)]">{error}</p>
+          )}
 
-          <button
-            onClick={handleBook}
-            disabled={!selected || booking}
-            className="mt-6 w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-          >
+          <Button onClick={handleBook} disabled={!selected || booking} className="mt-6 w-full">
             {booking ? 'Booking…' : selected ? `Book ${selected}` : 'Select a slot'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

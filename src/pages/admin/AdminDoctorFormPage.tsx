@@ -1,8 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from '../../components/Button'
 import { NavBar } from '../../components/NavBar'
+import { PageHeader } from '../../components/PageHeader'
 import { api, unwrap } from '../../lib/api'
 import type { Doctor } from '../../types'
+
+const INPUT_CLASSES =
+  'w-full rounded-[4px] border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] focus:border-[var(--accent)] focus:outline-none'
+const LABEL_CLASSES = 'mb-1 block text-sm font-medium text-[var(--ink)]'
 
 export function AdminDoctorFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -51,76 +57,60 @@ export function AdminDoctorFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--panel)]">
       <NavBar />
       <div className="mx-auto max-w-lg px-4 py-8">
-        <h1 className="mb-6 text-2xl font-semibold text-gray-900">
-          {isEdit ? 'Edit Doctor' : 'Add Doctor'}
-        </h1>
+        <PageHeader title={isEdit ? 'Edit doctor' : 'Add doctor'} />
         {loading ? (
-          <p className="text-gray-500">Loading…</p>
+          <p className="text-[var(--ink)]/60">Loading…</p>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-          >
-            {error && <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4 rounded-[4px] border border-[var(--line)] bg-white p-6">
+            {error && (
+              <p className="rounded-[4px] bg-[var(--flag-soft)] px-3 py-2 text-sm text-[var(--flag)]">{error}</p>
+            )}
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
-              <input
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-              />
+              <label className={LABEL_CLASSES}>Name</label>
+              <input required value={name} onChange={(e) => setName(e.target.value)} className={INPUT_CLASSES} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Specialization</label>
+              <label className={LABEL_CLASSES}>Specialization</label>
               <input
                 required
                 value={specialization}
                 onChange={(e) => setSpecialization(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                className={INPUT_CLASSES}
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Email</label>
+              <label className={LABEL_CLASSES}>Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                className={INPUT_CLASSES}
               />
             </div>
             {!isEdit && (
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Password</label>
+                <label className={LABEL_CLASSES}>Password</label>
                 <input
                   type="password"
                   required
                   minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                  className={INPUT_CLASSES}
                 />
               </div>
             )}
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Phone (optional)</label>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-              />
+              <label className={LABEL_CLASSES}>Phone (optional)</label>
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} className={INPUT_CLASSES} />
             </div>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-            >
+            <Button type="submit" disabled={submitting} className="w-full">
               {submitting ? 'Saving…' : 'Save'}
-            </button>
+            </Button>
           </form>
         )}
       </div>
